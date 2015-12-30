@@ -39,7 +39,7 @@ without jumping through a bunch of hoops:
         dsn: DBI:mysql:database=foo
         username: bar
         password:
-            - &proxy
+            - $proxy
             - MyApp::Config
             - get_db_password
             - bar
@@ -50,10 +50,10 @@ calling the method.
 
 A method proxy, in Perl syntax, looks like this:
 
-    ['&proxy', $package, $method, @args]
+    ['$proxy', $package, $method, @args]
 
-Which is then converted to a method call and replaced by the return value of
-the method call:
+The C<$proxy> string can also be written as C<&proxy>.  The above is then
+converted to a method call and replaced by the return value of the method call:
 
     $package->$method( @args );
 
@@ -144,7 +144,7 @@ sub apply_method_proxies {
     if (is_method_proxy( $some_data )) { ... }
 
 Returns true if the supplied data is an array ref where the first value
-is the string C<&proxy>.
+is the string C<$proxy> or C<&proxy>.
 
 =cut
 
@@ -154,14 +154,14 @@ sub is_method_proxy {
     return 0 if ref($data) ne 'ARRAY';
     return 0 if !@$data;
     return 0 if !defined $data->[0];
-    return 0 if $data->[0] ne '&proxy';
+    return 0 if $data->[0] !~ m{^[&\$]proxy$};
 
     return 1;
 }
 
 =head2 call_method_proxy
 
-    call_method_proxy( ['&proxy', $package, $method, @args] );
+    call_method_proxy( ['$proxy', $package, $method, @args] );
 
 Calls a method proxy and returns the value.
 

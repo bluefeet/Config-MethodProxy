@@ -2,6 +2,9 @@ Revision history for Perl extension Config::MethodProxy.
 
 {{$NEXT}}
 
+ - Support $proxy as an alternative to &proxy so that it isn't parsed
+   as a YAML anchor.
+
 0.01 2015-12-29
 
  - First release.

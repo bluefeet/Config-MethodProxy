@@ -17,8 +17,9 @@ subtest is_method_proxy => sub{
         [['&proxx'], 0, q<['&proxx']>],
         [{foo=>1}, 0, '{foo=>1}'],
         ['abc', 0, 'abc'],
+        [['$proxy'], 1, q<['&proxy']>],
+        [['$proxy','Package','method','arg'], 1, q<['&proxy','Package','method','arg']>],
         [['&proxy'], 1, q<['&proxy']>],
-        [['&proxy','Package','method','arg'], 1, q<['&proxy','Package','method','arg']>],
     ) {
        my ($value, $ok, $msg) = @$test;
 
@@ -31,7 +32,7 @@ subtest is_method_proxy => sub{
 };
 
 is(
-    call_method_proxy(['&proxy', 'My::Test::Config', 'foo', 'bar', 'baz']),
+    call_method_proxy(['$proxy', 'My::Test::Config', 'foo', 'bar', 'baz']),
     'FOO-bar-baz',
     'call_method_proxy',
 );
@@ -39,7 +40,7 @@ is(
 is(
     apply_method_proxies({
         this => 1,
-        that => ['&proxy', 'My::Test::Config', 'foo', 'that'],
+        that => ['$proxy', 'My::Test::Config', 'foo', 'that'],
         them => [
             'abc',
             ['&proxy', 'My::Test::Config', 'foo', 'them'],
