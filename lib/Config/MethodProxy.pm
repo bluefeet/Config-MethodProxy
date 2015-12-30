@@ -67,7 +67,7 @@ C<get_db_password> method to it.
 =cut
 
 use Scalar::Util qw( refaddr );
-use Module::Runtime qw( require_module );
+use Module::Runtime qw( require_module is_module_name );
 use Carp qw( croak );
 
 use strictures 2;
@@ -149,12 +149,12 @@ is the string C<$proxy> or C<&proxy>.
 =cut
 
 sub is_method_proxy {
-    my ($data) = @_;
+    my ($proxy) = @_;
 
-    return 0 if ref($data) ne 'ARRAY';
-    return 0 if !@$data;
-    return 0 if !defined $data->[0];
-    return 0 if $data->[0] !~ m{^[&\$]proxy$};
+    return 0 if ref($proxy) ne 'ARRAY';
+    return 0 if !@$proxy;
+    return 0 if !defined $proxy->[0];
+    return 0 if $proxy->[0] !~ m{^[&\$]proxy$};
 
     return 1;
 }
@@ -168,9 +168,21 @@ Calls a method proxy and returns the value.
 =cut
 
 sub call_method_proxy {
-    my ($data) = @_;
+    my ($proxy) = @_;
 
-    my ($marker, $package, $method, @args) = @$data;
+    local $Carp::Internal{ (__PACKAGE__) } = 1;
+
+    croak 'Not a method proxy array ref' if !is_method_proxy( $proxy );
+
+    my ($marker, $package, $method, @args) = @$proxy;
+
+    croak 'The method proxy package is undefined' if !defined $package;
+    croak 'The method proxy method is undefined' if !defined $method;
+
+    croak "The method proxy package, '$package', is not a valid package name"
+        if !is_module_name( $package );
+
+    require_module( $package );
 
     return $package->$method( @args );
 }

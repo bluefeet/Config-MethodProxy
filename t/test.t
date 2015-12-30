@@ -7,6 +7,7 @@ use Config::MethodProxy qw( :all );
 {
     package My::Test::Config;
     sub foo { shift; join('-','FOO',@_) }
+    $INC{'My/Test/Config.pm'} = 1;
 }
 
 subtest is_method_proxy => sub{
@@ -31,11 +32,37 @@ subtest is_method_proxy => sub{
     }
 };
 
-is(
-    call_method_proxy(['$proxy', 'My::Test::Config', 'foo', 'bar', 'baz']),
-    'FOO-bar-baz',
-    'call_method_proxy',
-);
+subtest call_method_proxy => sub{
+    is(
+        call_method_proxy(['$proxy', 'My::Test::Config', 'foo', 'bar', 'baz']),
+        'FOO-bar-baz',
+        'works',
+    );
+
+    like(
+        dies { call_method_proxy([undef, 'My::Test::Config', 'foo', 'bar', 'baz']) },
+        qr{Not a method proxy},
+        'invalid marker string failed',
+    );
+
+    like(
+        dies { call_method_proxy(['$proxy', undef, 'foo', 'bar', 'baz']) },
+        qr{package is undefined},
+        'undef package failed',
+    );
+
+    like(
+        dies { call_method_proxy(['$proxy', 'My::Test::Config', undef, 'bar', 'baz']) },
+        qr{method is undefined},
+        'undef method failed',
+    );
+
+    like(
+        dies { call_method_proxy(['$proxy', 'My::Test::Config::Bad', 'foo', 'bar', 'baz']) },
+        qr{Can't locate},
+        'nonexistent package failed',
+    );
+};
 
 is(
     apply_method_proxies({
