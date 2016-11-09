@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-use Test::Stream '-V1', 'Subtest';
+use Test2::Bundle::Extended;
 use Test::Fatal;
 
 use Config::MethodProxy qw( :all );
