@@ -2,6 +2,8 @@ Revision history for Perl extension Config::MethodProxy.
 
 {{$NEXT}}
 
+0.02 2016-11-09
+
  - Switch from Test::Stream to Test2::Bundle::Extended.
  - Support $proxy as an alternative to &proxy so that it isn't parsed
    as a YAML anchor.
