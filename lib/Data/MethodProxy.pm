@@ -1,6 +1,6 @@
 package Data::MethodProxy;
 
-$Data::MethodProxy::VERSION = '0.02';
+$Data::MethodProxy::VERSION = '0.03';
 
 =head1 NAME
 

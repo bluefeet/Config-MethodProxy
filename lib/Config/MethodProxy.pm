@@ -1,6 +1,6 @@
 package Config::MethodProxy;
 
-$Config::MethodProxy::VERSION = '0.02';
+$Config::MethodProxy::VERSION = '0.03';
 
 =head1 NAME
 

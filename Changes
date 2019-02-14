@@ -2,6 +2,8 @@ Revision history for Perl extension Data-MethodProxy.
 
 {{$NEXT}}
 
+0.03 2019-02-14T17:30:56Z
+
  - Rename distribution from Config-MethodProxy to Data-MethodProxy.
  - Created Data::MethodProxy, an OO version of Config::MethodProxy.
  - Made Config::MethodProxy a tiny shim over Data::MethodProxy.
