@@ -1,24 +1,41 @@
 # NAME
 
-Data::MethodProxy - Integrate dynamic logic with static configuration.
+Data::MethodProxy - Inject dynamic data into static data.
 
 # SYNOPSIS
 
     use Data::MethodProxy;
     
-    $config = get_your_config_somewhere();
-    $config = apply_method_proxies( $config );
+    my $mproxy = Data::MethodProxy->new();
+    
+    my $output = $mproxy->render({
+        half_six => ['$proxy', 'main', 'half', 6],
+    });
+    # { half_six => 3 }
+    
+    sub half {
+        my ($class, $number) = @_;
+        return $number / 2;
+    }
 
 # DESCRIPTION
 
-A method proxy is a particular data structure which, when found,
-is replaced by the value returned by calling that method.  In this
-way static configuration can be setup to call your code and return
-dynamic contents.  This makes static configuration much more powerful,
-and gives you the ability to be more declarative in how dynamic values
-make it into your configuration.
+A method proxy is an array ref describing a class method to call and the
+arguments to pass to it.  The first value of the array ref is the scalar
+`$proxy`, followed by a package name, then a subroutine name which must
+callable in the package, and a list of any subroutine arguments.
 
-# EXAMPLE
+    [ '$proxy', 'Foo::Bar', 'baz', 123, 4 ]
+
+The above is saying, do this:
+
+    Foo::Bar->baz( 123, 4 );
+
+The ["render"](#render) method is the main entry point for replacing all found
+method proxies in an arbitrary data structure with the return value of
+calling the methods.
+
+## Example
 
 Consider this static YAML configuration:
 
@@ -40,11 +57,11 @@ without jumping through a bunch of hoops:
             - $proxy
             - MyApp::Config
             - get_db_password
-            - bar
+            - foo-bar
 
-When ["apply\_method\_proxies"](#apply_method_proxies) is called on the above data structure it will
-see the method proxy and will replace the array ref with the return value of
-calling the method.
+When ["render"](#render) is called on the above data structure it will
+see the method proxy and will replace the array ref with the
+return value of calling the method.
 
 A method proxy, in Perl syntax, looks like this:
 
@@ -57,38 +74,42 @@ converted to a method call and replaced by the return value of the method call:
 
 In the above database password example the method call would be this:
 
-    MyApp::Config->get_db_password( 'bar' );
+    MyApp::Config->get_db_password( 'foo-bar' );
 
-You would still need to create a `MyApp::Config` package, and add a
+You'd still need to create a `MyApp::Config` package, and add a
 `get_db_password` method to it.
 
-# FUNCTIONS
+# METHODS
 
-Only the ["apply\_method\_proxies"](#apply_method_proxies) function is exported by default.
+## render
 
-## apply\_method\_proxies
-
-    $config = apply_method_proxies( $config );
+    my $output = $mproxy->render( $input );
 
 Traverses the supplied data looking for method proxies, calling them, and
-replacing them with the return value of the method.  Any value may be passed,
-such as a hash ref, an array ref, a method proxy, an object, a scalar, etc.
-Array and hash refs will be recursively searched for method proxies.
+replacing them with the return value of the method call.  Any value may be
+passed, such as a hash ref, an array ref, a method proxy, an object, a scalar,
+etc.  Array and hash refs will be recursively searched for method proxies.
 
 If a circular reference is detected an error will be thrown.
 
-## is\_method\_proxy
+## call
 
-    if (is_method_proxy( $some_data )) { ... }
+    my $return = $mproxy->call( ['$proxy', $package, $method, @args] );
 
-Returns true if the supplied data is an array ref where the first value
-is the string `$proxy` or `&proxy`.
+Calls the method proxy and returns its return.
 
-## call\_method\_proxy
+## is\_valid
 
-    call_method_proxy( ['$proxy', $package, $method, @args] );
+    die unless $mproxy->is_valid( ... );
 
-Calls a method proxy and returns the value.
+Returns true if the passed value looks like a method proxy.
+
+## is\_callable
+
+    die unless $mproxy->is_callable( ... );
+
+Returns true if the passed value looks like a method proxy,
+and has a package and method which exist.
 
 # AUTHOR
 

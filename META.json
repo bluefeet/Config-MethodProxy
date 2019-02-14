@@ -1,5 +1,5 @@
 {
-   "abstract" : "Integrate dynamic logic with static configuration.",
+   "abstract" : "Inject dynamic data into static data.",
    "author" : [
       "Aran Clary Deltac <bluefeet@gmail.com>"
    ],
@@ -45,14 +45,12 @@
             "Carp" : "0",
             "Exporter" : "0",
             "Module::Runtime" : "0.014",
-            "Scalar::Util" : "0",
-            "namespace::clean" : "0.24",
-            "strictures" : "2"
+            "Scalar::Util" : "0"
          }
       },
       "test" : {
          "requires" : {
-            "Test2::Bundle::Extended" : "0"
+            "Test2::V0" : "0.000071"
          }
       }
    },

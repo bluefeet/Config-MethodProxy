@@ -4,25 +4,42 @@ $Data::MethodProxy::VERSION = '0.02';
 
 =head1 NAME
 
-Data::MethodProxy - Integrate dynamic logic with static configuration.
+Data::MethodProxy - Inject dynamic data into static data.
 
 =head1 SYNOPSIS
 
     use Data::MethodProxy;
     
-    $config = get_your_config_somewhere();
-    $config = apply_method_proxies( $config );
+    my $mproxy = Data::MethodProxy->new();
+    
+    my $output = $mproxy->render({
+        half_six => ['$proxy', 'main', 'half', 6],
+    });
+    # { half_six => 3 }
+    
+    sub half {
+        my ($class, $number) = @_;
+        return $number / 2;
+    }
 
 =head1 DESCRIPTION
 
-A method proxy is a particular data structure which, when found,
-is replaced by the value returned by calling that method.  In this
-way static configuration can be setup to call your code and return
-dynamic contents.  This makes static configuration much more powerful,
-and gives you the ability to be more declarative in how dynamic values
-make it into your configuration.
+A method proxy is an array ref describing a class method to call and the
+arguments to pass to it.  The first value of the array ref is the scalar
+C<$proxy>, followed by a package name, then a subroutine name which must
+callable in the package, and a list of any subroutine arguments.
 
-=head1 EXAMPLE
+    [ '$proxy', 'Foo::Bar', 'baz', 123, 4 ]
+
+The above is saying, do this:
+
+    Foo::Bar->baz( 123, 4 );
+
+The L</render> method is the main entry point for replacing all found
+method proxies in an arbitrary data structure with the return value of
+calling the methods.
+
+=head2 Example
 
 Consider this static YAML configuration:
 
@@ -44,11 +61,11 @@ without jumping through a bunch of hoops:
             - $proxy
             - MyApp::Config
             - get_db_password
-            - bar
+            - foo-bar
 
-When L</apply_method_proxies> is called on the above data structure it will
-see the method proxy and will replace the array ref with the return value of
-calling the method.
+When L</render> is called on the above data structure it will
+see the method proxy and will replace the array ref with the
+return value of calling the method.
 
 A method proxy, in Perl syntax, looks like this:
 
@@ -61,79 +78,70 @@ converted to a method call and replaced by the return value of the method call:
 
 In the above database password example the method call would be this:
 
-    MyApp::Config->get_db_password( 'bar' );
+    MyApp::Config->get_db_password( 'foo-bar' );
 
-You would still need to create a C<MyApp::Config> package, and add a
+You'd still need to create a C<MyApp::Config> package, and add a
 C<get_db_password> method to it.
 
 =cut
+
+use strict;
+use warnings;
 
 use Scalar::Util qw( refaddr );
 use Module::Runtime qw( require_module is_module_name );
 use Carp qw( croak );
 
-use strictures 2;
-use namespace::clean;
+sub new {
+    my $class = shift;
+    my $self = bless {}, $class;
+    return $self;
+}
 
-use Exporter qw( import );
+our $FOUND_DATA;
 
-our @EXPORT = qw(
-    apply_method_proxies
-);
+=head1 METHODS
 
-our @EXPORT_OK = qw(
-    apply_method_proxies
-    is_method_proxy
-    call_method_proxy
-);
+=head2 render
 
-our %EXPORT_TAGS = ('all' => \@EXPORT_OK);
-
-=head1 FUNCTIONS
-
-Only the L</apply_method_proxies> function is exported by default.
-
-=head2 apply_method_proxies
-
-    $config = apply_method_proxies( $config );
+    my $output = $mproxy->render( $input );
 
 Traverses the supplied data looking for method proxies, calling them, and
-replacing them with the return value of the method.  Any value may be passed,
-such as a hash ref, an array ref, a method proxy, an object, a scalar, etc.
-Array and hash refs will be recursively searched for method proxies.
+replacing them with the return value of the method call.  Any value may be
+passed, such as a hash ref, an array ref, a method proxy, an object, a scalar,
+etc.  Array and hash refs will be recursively searched for method proxies.
 
 If a circular reference is detected an error will be thrown.
 
 =cut
 
-our $found_data;
-
-sub apply_method_proxies {
-    my ($data) = @_;
+sub render {
+    my ($self, $data) = @_;
 
     return $data if !ref $data;
 
-    local $found_data = {} if !$found_data;
+    local $FOUND_DATA = {} if !$FOUND_DATA;
+
     my $refaddr = refaddr( $data );
-    if ($found_data->{$refaddr}) {
+    if ($FOUND_DATA->{$refaddr}) {
         local $Carp::Internal{ (__PACKAGE__) } = 1;
-        croak 'Circular reference encountered in data passed to apply_method_proxies';
+        croak 'Circular reference detected in data passed to render()';
     }
-    $found_data->{$refaddr} = 1;
+    $FOUND_DATA->{$refaddr} = 1;
 
     if (ref($data) eq 'HASH') {
         return {
-            map { $_ => apply_method_proxies( $data->{$_} ) }
+            map { $_ => $self->render( $data->{$_} ) }
             keys( %$data )
         };
     }
     elsif (ref($data) eq 'ARRAY') {
-        if (is_method_proxy( $data )) {
-            return call_method_proxy( $data );
+        if ($self->is_valid( $data )) {
+            return $self->call( $data );
         }
 
         return [
-            map { apply_method_proxies( $_ ) }
+            map { $self->render( $_ ) }
             @$data
         ];
     }
@@ -141,52 +149,69 @@ sub apply_method_proxies {
     return $data;
 }
 
-=head2 is_method_proxy
+=head2 call
 
-    if (is_method_proxy( $some_data )) { ... }
+    my $return = $mproxy->call( ['$proxy', $package, $method, @args] );
 
-Returns true if the supplied data is an array ref where the first value
-is the string C<$proxy> or C<&proxy>.
+Calls the method proxy and returns its return.
 
 =cut
 
-sub is_method_proxy {
-    my ($proxy) = @_;
+sub call {
+    my ($self, $proxy) = @_;
+
+    {
+        local $Carp::Internal{ (__PACKAGE__) } = 1;
+        croak 'Invalid method proxy passed to call()' if !$self->is_valid( $proxy );
+        croak 'Uncallable method proxy passed to call()' if !$self->is_callable( $proxy );
+    }
+
+    my ($marker, $package, $method, @args) = @$proxy;
+    require_module( $package );
+    return $package->$method( @args );
+}
+
+=head2 is_valid
+
+    die unless $mproxy->is_valid( ... );
+
+Returns true if the passed value looks like a method proxy.
+
+=cut
+
+sub is_valid {
+    my ($self, $proxy) = @_;
 
     return 0 if ref($proxy) ne 'ARRAY';
-    return 0 if !@$proxy;
-    return 0 if !defined $proxy->[0];
-    return 0 if $proxy->[0] !~ m{^[&\$]proxy$};
+    my ($marker, $package, $method, @args) = @$proxy;
+
+    return 0 if !defined $marker;
+    return 0 if $marker !~ m{^[&\$]proxy$};
+    return 0 if !defined $package;
+    return 0 if !defined $method;
 
     return 1;
 }
 
-=head2 call_method_proxy
+=head2 is_callable
 
-    call_method_proxy( ['$proxy', $package, $method, @args] );
+    die unless $mproxy->is_callable( ... );
 
-Calls a method proxy and returns the value.
+Returns true if the passed value looks like a method proxy,
+and has a package and method which exist.
 
 =cut
 
-sub call_method_proxy {
-    my ($proxy) = @_;
+sub is_callable {
+    my ($self, $proxy) = @_;
 
-    local $Carp::Internal{ (__PACKAGE__) } = 1;
-
-    croak 'Not a method proxy array ref' if !is_method_proxy( $proxy );
-
+    return 0 if !$self->is_valid( $proxy );
     my ($marker, $package, $method, @args) = @$proxy;
 
-    croak 'The method proxy package is undefined' if !defined $package;
-    croak 'The method proxy method is undefined' if !defined $method;
+    return 0 if !is_module_name( $package );
+    return 0 if !$package->can( $method );
 
-    croak "The method proxy package, '$package', is not a valid package name"
-        if !is_module_name( $package );
-
-    require_module( $package );
-
-    return $package->$method( @args );
+    return 1;
 }
 
 1;
@@ -207,6 +232,4 @@ development this distribution would not exist.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
-
-=cut
 
