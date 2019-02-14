@@ -2,7 +2,7 @@
 use Test2::Bundle::Extended;
 use Test::Fatal;
 
-use Config::MethodProxy qw( :all );
+use Data::MethodProxy qw( :all );
 
 {
     package My::Test::Config;

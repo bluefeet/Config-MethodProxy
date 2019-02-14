@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-Config::MethodProxy - Integrate dynamic logic with static configuration.
+Data::MethodProxy - Integrate dynamic logic with static configuration.
 
 =head1 SYNOPSIS
 
-    use Config::MethodProxy;
+    use Data::MethodProxy;
     
     $config = get_your_config_somewhere();
     $config = apply_method_proxies( $config );
