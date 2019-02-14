@@ -1,5 +1,7 @@
 package Data::MethodProxy;
 
+$Data::MethodProxy::VERSION = '0.02';
+
 =head1 NAME
 
 Data::MethodProxy - Integrate dynamic logic with static configuration.

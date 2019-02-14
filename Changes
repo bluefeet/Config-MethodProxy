@@ -1,6 +1,8 @@
-Revision history for Perl extension Data::MethodProxy.
+Revision history for Perl extension Data-MethodProxy.
 
 {{$NEXT}}
+
+ - Migrate build tooling from Dist::Zilla to Minilla.
 
 0.02 2016-11-09
 

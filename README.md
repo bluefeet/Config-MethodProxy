@@ -1,17 +1,15 @@
-=pod
-
-=head1 NAME
+# NAME
 
 Data::MethodProxy - Integrate dynamic logic with static configuration.
 
-=head1 SYNOPSIS
+# SYNOPSIS
 
     use Data::MethodProxy;
     
     $config = get_your_config_somewhere();
     $config = apply_method_proxies( $config );
 
-=head1 DESCRIPTION
+# DESCRIPTION
 
 A method proxy is a particular data structure which, when found,
 is replaced by the value returned by calling that method.  In this
@@ -20,7 +18,7 @@ dynamic contents.  This makes static configuration much more powerful,
 and gives you the ability to be more declarative in how dynamic values
 make it into your configuration.
 
-=head1 EXAMPLE
+# EXAMPLE
 
 Consider this static YAML configuration:
 
@@ -44,7 +42,7 @@ without jumping through a bunch of hoops:
             - get_db_password
             - bar
 
-When L</apply_method_proxies> is called on the above data structure it will
+When ["apply\_method\_proxies"](#apply_method_proxies) is called on the above data structure it will
 see the method proxy and will replace the array ref with the return value of
 calling the method.
 
@@ -52,7 +50,7 @@ A method proxy, in Perl syntax, looks like this:
 
     ['$proxy', $package, $method, @args]
 
-The C<$proxy> string can also be written as C<&proxy>.  The above is then
+The `$proxy` string can also be written as `&proxy`.  The above is then
 converted to a method call and replaced by the return value of the method call:
 
     $package->$method( @args );
@@ -61,14 +59,14 @@ In the above database password example the method call would be this:
 
     MyApp::Config->get_db_password( 'bar' );
 
-You would still need to create a C<MyApp::Config> package, and add a
-C<get_db_password> method to it.
+You would still need to create a `MyApp::Config` package, and add a
+`get_db_password` method to it.
 
-=head1 FUNCTIONS
+# FUNCTIONS
 
-Only the L</apply_method_proxies> function is exported by default.
+Only the ["apply\_method\_proxies"](#apply_method_proxies) function is exported by default.
 
-=head2 apply_method_proxies
+## apply\_method\_proxies
 
     $config = apply_method_proxies( $config );
 
@@ -79,33 +77,31 @@ Array and hash refs will be recursively searched for method proxies.
 
 If a circular reference is detected an error will be thrown.
 
-=head2 is_method_proxy
+## is\_method\_proxy
 
     if (is_method_proxy( $some_data )) { ... }
 
 Returns true if the supplied data is an array ref where the first value
-is the string C<$proxy> or C<&proxy>.
+is the string `$proxy` or `&proxy`.
 
-=head2 call_method_proxy
+## call\_method\_proxy
 
     call_method_proxy( ['$proxy', $package, $method, @args] );
 
 Calls a method proxy and returns the value.
 
-=head1 AUTHOR
+# AUTHOR
 
-Aran Clary Deltac <bluefeetE<64>gmail.com>
+Aran Clary Deltac <bluefeet@gmail.com>
 
-=head1 ACKNOWLEDGEMENTS
+# ACKNOWLEDGEMENTS
 
-Thanks to L<ZipRecruiter|https://www.ziprecruiter.com/>
+Thanks to [ZipRecruiter](https://www.ziprecruiter.com/)
 for encouraging their employees to contribute back to the open
 source ecosystem.  Without their dedication to quality software
 development this distribution would not exist.
 
-=head1 LICENSE
+# LICENSE
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
-
-=cut
