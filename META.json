@@ -45,7 +45,8 @@
             "Carp" : "0",
             "Exporter" : "0",
             "Module::Runtime" : "0.014",
-            "Scalar::Util" : "0"
+            "Scalar::Util" : "0",
+            "perl" : "5.008001"
          }
       },
       "test" : {
