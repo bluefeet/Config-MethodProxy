@@ -1,3 +1,4 @@
+requires 'perl' => '5.008001';
 requires 'Module::Runtime' => '0.014';
 
 requires 'Exporter';
