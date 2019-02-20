@@ -1,5 +1,7 @@
 package Config::MethodProxy;
-
+use 5.008001;
+use strict;
+use warnings;
 our $VERSION = '0.03';
 
 =head1 NAME
@@ -17,9 +19,6 @@ This module will be removed once a reasonable amount of time has passed and
 any reverse dependencies have gone away or deamed ignorable.
 
 =cut
-
-use strict;
-use warnings;
 
 use Data::MethodProxy;
 use Exporter qw( import );

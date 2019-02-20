@@ -1,5 +1,7 @@
 package Data::MethodProxy;
-
+use 5.008001;
+use strict;
+use warnings;
 our $VERSION = '0.03';
 
 =head1 NAME
@@ -84,9 +86,6 @@ You'd still need to create a C<MyApp::Config> package, and add a
 C<get_db_password> method to it.
 
 =cut
-
-use strict;
-use warnings;
 
 use Scalar::Util qw( refaddr );
 use Module::Runtime qw( require_module is_module_name );
