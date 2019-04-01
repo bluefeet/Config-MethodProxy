@@ -4,6 +4,8 @@ use strict;
 use warnings;
 our $VERSION = '0.03';
 
+=encoding utf8
+
 =head1 NAME
 
 Data::MethodProxy - Inject dynamic data into static data.
@@ -216,9 +218,16 @@ sub is_callable {
 1;
 __END__
 
-=head1 AUTHOR
+=head1 SUPPORT
 
-Aran Clary Deltac <bluefeetE<64>gmail.com>
+Please submit bugs and feature requests to the
+Data-MethodProxy GitHub issue tracker:
+
+L<https://github.com/bluefeet/Data-MethodProxy/issues>
+
+=head1 AUTHORS
+
+    Aran Clary Deltac <bluefeet@gmail.com>
 
 =head1 ACKNOWLEDGEMENTS
 
@@ -231,4 +240,6 @@ development this distribution would not exist.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=cut
 

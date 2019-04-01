@@ -4,6 +4,8 @@ use strict;
 use warnings;
 our $VERSION = '0.03';
 
+=encoding utf8
+
 =head1 NAME
 
 Config::MethodProxy - A backwards compatibility shim for Data::MethodProxy.
@@ -79,19 +81,17 @@ sub call_method_proxy {
 1;
 __END__
 
-=head1 AUTHOR
+=head1 SUPPORT
 
-Aran Clary Deltac <bluefeetE<64>gmail.com>
+See L<Data::MethodProxy/SUPPORT>.
 
-=head1 ACKNOWLEDGEMENTS
+=head1 AUTHORS
 
-Thanks to L<ZipRecruiter|https://www.ziprecruiter.com/>
-for encouraging their employees to contribute back to the open
-source ecosystem.  Without their dedication to quality software
-development this distribution would not exist.
+See L<Data::MethodProxy/AUTHORS>.
 
 =head1 LICENSE
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+See L<Data::MethodProxy/LICENSE>.
+
+=cut
 

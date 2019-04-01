@@ -2,6 +2,7 @@ Revision history for Perl extension Data-MethodProxy.
 
 {{$NEXT}}
 
+ - Minor documentation cleanups.
  - Require perl 5.8.1.
  - Simplify VERSION declarations.
 
