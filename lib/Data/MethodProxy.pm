@@ -225,16 +225,16 @@ Data-MethodProxy GitHub issue tracker:
 
 L<https://github.com/bluefeet/Data-MethodProxy/issues>
 
-=head1 AUTHORS
-
-    Aran Clary Deltac <bluefeet@gmail.com>
-
 =head1 ACKNOWLEDGEMENTS
 
 Thanks to L<ZipRecruiter|https://www.ziprecruiter.com/>
 for encouraging their employees to contribute back to the open
 source ecosystem.  Without their dedication to quality software
 development this distribution would not exist.
+
+=head1 AUTHORS
+
+    Aran Clary Deltac <bluefeet@gmail.com>
 
 =head1 LICENSE
 

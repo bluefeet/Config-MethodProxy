@@ -2,6 +2,8 @@ Revision history for Perl extension Data-MethodProxy.
 
 {{$NEXT}}
 
+ - Provide a .editorconfig instead of .lvimrc.
+
 0.04 2019-04-01T05:34:38Z
 
  - Minor documentation cleanups.
